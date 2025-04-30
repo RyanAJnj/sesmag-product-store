@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState(""); // 🔹 add password input
+  const [password, setPassword] = useState("");
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
@@ -15,15 +15,15 @@ function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/login", {
-        username,
-        password,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        { username, password }
+      );
 
       const token = res.data.token;
       if (token) {
-        localStorage.setItem("token", token); // ✅ save JWT
-        login(username); // ✅ optional: update global store
+        localStorage.setItem("token", token);
+        login(username);
         toast.success("Login successful!");
         navigate("/");
       } else {
