@@ -2,17 +2,18 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// base url will be dynamic depending on the environment
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
+// ✅ Use correct API URL in production
+const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:3000"
+    : import.meta.env.VITE_API_URL;
 
 export const useProductStore = create((set, get) => ({
-  // products state
   products: [],
   loading: false,
   error: null,
   currentProduct: null,
 
-  // form state
   formData: {
     name: "",
     price: "",
@@ -28,7 +29,12 @@ export const useProductStore = create((set, get) => ({
 
     try {
       const { formData } = get();
-      await axios.post(`${BASE_URL}/api/products`, formData);
+      const token = localStorage.getItem("token");
+
+      await axios.post(`${BASE_URL}/api/products`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       await get().fetchProducts();
       get().resetForm();
       toast.success("Product added successfully");
@@ -47,7 +53,8 @@ export const useProductStore = create((set, get) => ({
       const response = await axios.get(`${BASE_URL}/api/products`);
       set({ products: response.data.data, error: null });
     } catch (err) {
-      if (err.status == 429) set({ error: "Rate limit exceeded", products: [] });
+      if (err.response?.status === 429)
+        set({ error: "Rate limit exceeded", products: [] });
       else set({ error: "Something went wrong", products: [] });
     } finally {
       set({ loading: false });
@@ -55,11 +62,18 @@ export const useProductStore = create((set, get) => ({
   },
 
   deleteProduct: async (id) => {
-    console.log("deleteProduct function called", id);
     set({ loading: true });
     try {
-      await axios.delete(`${BASE_URL}/api/products/${id}`);
-      set((prev) => ({ products: prev.products.filter((product) => product.id !== id) }));
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`${BASE_URL}/api/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      set((prev) => ({
+        products: prev.products.filter((product) => product.id !== id),
+      }));
+
       toast.success("Product deleted successfully");
     } catch (error) {
       console.log("Error in deleteProduct function", error);
@@ -75,7 +89,7 @@ export const useProductStore = create((set, get) => ({
       const response = await axios.get(`${BASE_URL}/api/products/${id}`);
       set({
         currentProduct: response.data.data,
-        formData: response.data.data, // pre-fill form with current product data
+        formData: response.data.data,
         error: null,
       });
     } catch (error) {
@@ -85,11 +99,21 @@ export const useProductStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+
   updateProduct: async (id) => {
     set({ loading: true });
     try {
       const { formData } = get();
-      const response = await axios.put(`${BASE_URL}/api/products/${id}`, formData);
+      const token = localStorage.getItem("token");
+
+      const response = await axios.put(
+        `${BASE_URL}/api/products/${id}`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       set({ currentProduct: response.data.data });
       toast.success("Product updated successfully");
     } catch (error) {
