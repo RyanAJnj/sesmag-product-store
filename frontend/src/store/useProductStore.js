@@ -31,7 +31,7 @@ export const useProductStore = create((set, get) => ({
       const { formData } = get();
       const token = localStorage.getItem("token");
 
-      await axios.post(`${BASE_URL}/api/products`, formData, {
+      await axios.post(`${BASE_URL}api/products`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -50,7 +50,7 @@ export const useProductStore = create((set, get) => ({
   fetchProducts: async () => {
     set({ loading: true });
     try {
-      const response = await axios.get(`${BASE_URL}/api/products`);
+      const response = await axios.get(`${BASE_URL}api/products`);
       set({ products: response.data.data, error: null });
     } catch (err) {
       if (err.response?.status === 429)
@@ -66,7 +66,7 @@ export const useProductStore = create((set, get) => ({
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`${BASE_URL}/api/products/${id}`, {
+      await axios.delete(`${BASE_URL}api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -86,7 +86,7 @@ export const useProductStore = create((set, get) => ({
   fetchProduct: async (id) => {
     set({ loading: true });
     try {
-      const response = await axios.get(`${BASE_URL}/api/products/${id}`);
+      const response = await axios.get(`${BASE_URL}api/products/${id}`);
       set({
         currentProduct: response.data.data,
         formData: response.data.data,
@@ -107,7 +107,7 @@ export const useProductStore = create((set, get) => ({
       const token = localStorage.getItem("token");
 
       const response = await axios.put(
-        `${BASE_URL}/api/products/${id}`,
+        `${BASE_URL}api/products/${id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
